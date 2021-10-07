@@ -1,0 +1,3 @@
+# multi-scale-templatematching
+# Using template matching along with various other image processing techniques to accurately match template 
+# Contact owner to know more..............................
