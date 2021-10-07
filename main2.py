@@ -87,7 +87,7 @@ while True:
 	# draw a bounding box around the detected result and display the image
 	cv2.rectangle(image, (startX, startY), (endX, endY), (0, 0, 255), 2)
 	cv2.imshow("Image", image)
-	cv2.waitKey(1)
+	
 	if cv2.waitKey(1) & 0xFF == ord('q'):
 		break
 
