@@ -28,16 +28,16 @@ while True:
 
 	# load the image, convert it to grayscale, and initialize the
 	# bookkeeping variable to keep track of the matched region
-	image = cv2.imread(imagePath)
+	_,image = vid.read()
 	
 	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	found = None
 	# loop over the scales of the image
-	for scale in np.linspace(0.2, 4, 20)[::-1]:
+	for scale in np.linspace(0.05, 0.5, 10)[::-1]:
 		# resize the image according to the scale, and keep track
 		# of the ratio of the resizing
 		resized = imutils.resize(gray, width = int(gray.shape[1] * scale))
-		ret, resized = cv2.threshold(resized,210,255,cv2.THRESH_BINARY)
+		ret, resized = cv2.threshold(resized,150,255,cv2.THRESH_BINARY)
 		r = gray.shape[1] / float(resized.shape[1])
 		# if the resized image is smaller than the template, then break
 		# from the loop
@@ -49,7 +49,7 @@ while True:
 		result = cv2.matchTemplate(resized, template, cv2.TM_CCOEFF)
 		(yCoords, xCoords) = np.where(result>=args["threshold"])
 		clone = image.copy()
-		print("[INFO] {} matched locations *before* NMS".format(len(yCoords)))
+		# print("[INFO] {} matched locations *before* NMS".format(len(yCoords)))
 		edged = resized
 		(_, maxVal, _, maxLoc) = cv2.minMaxLoc(result)
 		# check to see if the iteration should be visualized
@@ -59,8 +59,6 @@ while True:
                     # draw the bounding box on the image
                         cv2.rectangle(clone, (x, y), (x + tW, y + tH),(255, 0, 0), 3)
                     # show our output image *before* applying non-maxima suppression
-                    cv2.imshow("Before NMS", clone)
-                    cv2.waitKey(0)
                     # initialize our list of rectangles
                     rects = []
                     # loop over the starting (x, y)-coordinates again
@@ -69,15 +67,14 @@ while True:
                             rects.append((x, y, x + tW, y + tH))
                     # apply non-maxima suppression to the rectangles
                     pick = non_max_suppression(np.array(rects))
-                    print("[INFO] {} matched locations *after* NMS".format(len(pick)))
+                    # print("[INFO] {} matched locations *after* NMS".format(len(pick)))
                     # loop over the final bounding boxes
                     for (startX, startY, endX, endY) in pick:
                             # draw the bounding box on the image
                             cv2.rectangle(image, (startX, startY), (endX, endY),
                                     (255, 0, 0), 3)
                     # show the output image
-                    cv2.imshow("After NMS", image)
-                    cv2.waitKey(0)    
+                      
 		# if we have found a new maximum correlation value, then update
 		# the bookkeeping variable
 		if found is None or maxVal > found[0]:
@@ -90,4 +87,11 @@ while True:
 	# draw a bounding box around the detected result and display the image
 	cv2.rectangle(image, (startX, startY), (endX, endY), (0, 0, 255), 2)
 	cv2.imshow("Image", image)
-	cv2.waitKey(0)
+	cv2.waitKey(1)
+	if cv2.waitKey(1) & 0xFF == ord('q'):
+		break
+
+# After the loop release the cap object
+vid.release()
+# Destroy all the windows
+cv2.destroyAllWindows()
